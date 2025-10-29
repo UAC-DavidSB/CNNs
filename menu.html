@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyectos CNN - Deep Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.85;
+            font-style: italic;
+        }
+
+        .stats-bar {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 30px auto;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            animation: fadeIn 1s ease-out 0.3s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .stat-item {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+
+        .project-card:nth-child(1) { animation-delay: 0.1s; }
+        .project-card:nth-child(2) { animation-delay: 0.2s; }
+        .project-card:nth-child(3) { animation-delay: 0.3s; }
+        .project-card:nth-child(4) { animation-delay: 0.4s; }
+        .project-card:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+
+        .card-header {
+            padding: 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .fashion-mnist { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .emnist { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .cifar10 { background: linear-gradient(135deg, #5f72bd 0%, #9b23ea 100%); }
+        .plantvillage { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .svhn { background: linear-gradient(135deg, #ee5a6f 0%, #f79d65 100%); }
+
+        .card-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-subtitle {
+            font-size: 1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-body {
+            padding: 25px 30px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .metric-label {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2c3e50;
+        }
+
+        .badges {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge-difficulty {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            color: #2c3e50;
+        }
+
+        .badge-framework {
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            color: white;
+        }
+
+        .badge-rank {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #2c3e50;
+        }
+
+        .view-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .view-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .view-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .view-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .view-button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .comparison-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: fadeIn 1s ease-out 0.6s both;
+        }
+
+        .comparison-title {
+            font-size: 2em;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .comparison-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .comparison-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .accuracy-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .accuracy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 50px;
+            padding: 30px;
+            opacity: 0.9;
+        }
+
+        .footer p {
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+            }
+
+            .comparison-table {
+                font-size: 0.85em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Proyectos CNN - Deep Learning</h1>
+            <p>Colección de Redes Neuronales Convolucionales</p>
+            <p class="subtitle">5 Datasets | 2 Frameworks | Clasificación de Imágenes</p>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-number">5</span>
+                <span class="stat-label">Proyectos</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">159K+</span>
+                <span class="stat-label">Imágenes Totales</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">92.43%</span>
+                <span class="stat-label">Mejor Accuracy</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">2</span>
+                <span class="stat-label">Frameworks</span>
+            </div>
+        </div>
+
+        <div class="projects-grid">
+            <!-- Fashion-MNIST -->
+            <div class="project-card" onclick="redirectToProject('Fashion-MNIST')">
+                <div class="card-header fashion-mnist">
+                    <div class="card-icon">👕</div>
+                    <div class="card-title">Fashion-MNIST</div>
+                    <div class="card-subtitle">Clasificación de Prendas</div>
+                </div>
+                <div class="card-body">
+                    <div class="metric-row">
+                        <span class="metric-label">Accuracy</span>
+                        <span class="metric-value" style="color: #667eea;">89.50%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Dataset</span>
+                        <span class="metric-value">60K train</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Clases</span>
+                        <span class="metric-value">10 prendas</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Parámetros</span>
+                        <span class="metric-value">421K</span>
+                    </div>
+                    <div class="badges">
+                        <span class="badge badge-difficulty">⭐ Fácil</span>
+                        <span class="badge badge-framework">TensorFlow</span>
+                        <span class="badge badge-rank">🥈 Rank #2</span>
+                    </div>
+                    <button class="view-button">
+                        <span>Ver Proyecto →</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- EMNIST -->
+            <div class="project-card" onclick="redirectToProject('EMNIST')">
+                <div class="card-header emnist">
+                    <div class="card-icon">🔤</div>
+                    <div class="card-title">EMNIST</div>
+                    <div class="card-subtitle">Reconocimiento de Caracteres</div>
+                </div>
+                <div class="card-body">
+                    <div class="metric-row">
+                        <span class="metric-label">Accuracy</span>
+                        <span class="metric-value" style="color: #f5576c;">76.90%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Dataset</span>
+                        <span class="metric-value">4K train</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Clases</span>
+                        <span class="metric-value">47 caracteres</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Parámetros</span>
+                        <span class="metric-value">124K</span>
+                    </div>
+                    <div class="badges">
+                        <span class="badge badge-difficulty">🔥🔥 Medio</span>
+                        <span class="badge badge-framework">TensorFlow</span>
+                        <span class="badge badge-rank">Rank #4</span>
+                    </div>
+                    <button class="view-button">
+                        <span>Ver Proyecto →</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CIFAR-10 -->
+            <div class="project-card" onclick="redirectToProject('CIFAR-10')">
+                <div class="card-header cifar10">
+                    <div class="card-icon">📸</div>
+                    <div class="card-title">CIFAR-10</div>
+                    <div class="card-subtitle">Clasificación de Objetos</div>
+                </div>
+                <div class="card-body">
+                    <div class="metric-row">
+                        <span class="metric-label">Accuracy</span>
+                        <span class="metric-value" style="color: #9b23ea;">69.95%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Dataset</span>
+                        <span class="metric-value">50K train</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Clases</span>
+                        <span class="metric-value">10 objetos</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Parámetros</span>
+                        <span class="metric-value">159K</span>
+                    </div>
+                    <div class="badges">
+                        <span class="badge badge-difficulty">🔥🔥 Medio</span>
+                        <span class="badge badge-framework">TensorFlow</span>
+                        <span class="badge badge-rank">Rank #5</span>
+                    </div>
+                    <button class="view-button">
+                        <span>Ver Proyecto →</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- PlantVillage -->
+            <div class="project-card" onclick="redirectToProject('PlantVillage')">
+                <div class="card-header plantvillage">
+                    <div class="card-icon">🌿</div>
+                    <div class="card-title">PlantVillage</div>
+                    <div class="card-subtitle">Detección de Enfermedades</div>
+                </div>
+                <div class="card-body">
+                    <div class="metric-row">
+                        <span class="metric-label">Accuracy</span>
+                        <span class="metric-value" style="color: #11998e;">84.26%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Dataset</span>
+                        <span class="metric-value">16.5K train</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Clases</span>
+                        <span class="metric-value">15 enfermedades</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Parámetros</span>
+                        <span class="metric-value">685K</span>
+                    </div>
+                    <div class="badges">
+                        <span class="badge badge-difficulty">🔥🔥🔥 Difícil</span>
+                        <span class="badge badge-framework">TensorFlow</span>
+                        <span class="badge badge-rank">🥉 Rank #3</span>
+                    </div>
+                    <button class="view-button">
+                        <span>Ver Proyecto →</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SVHN -->
+            <div class="project-card" onclick="redirectToProject('SVHN')">
+                <div class="card-header svhn">
+                    <div class="card-icon">🏠</div>
+                    <div class="card-title">SVHN</div>
+                    <div class="card-subtitle">Street View House Numbers</div>
+                </div>
+                <div class="card-body">
+                    <div class="metric-row">
+                        <span class="metric-label">Accuracy</span>
+                        <span class="metric-value" style="color: #ee5a6f;">92.43%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Dataset</span>
+                        <span class="metric-value">73K train</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Clases</span>
+                        <span class="metric-value">10 dígitos</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Parámetros</span>
+                        <span class="metric-value">620K</span>
+                    </div>
+                    <div class="badges">
+                        <span class="badge badge-difficulty">🔥🔥🔥 Difícil</span>
+                        <span class="badge badge-framework" style="background: linear-gradient(135deg, #ee4c2c 0%, #f05032 100%);">PyTorch</span>
+                        <span class="badge badge-rank">🥇 Rank #1</span>
+                    </div>
+                    <button class="view-button">
+                        <span>Ver Proyecto →</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-section">
+            <h2 class="comparison-title">📊 Tabla Comparativa de Modelos</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Proyecto</th>
+                        <th>Accuracy</th>
+                        <th>Dataset</th>
+                        <th>Clases</th>
+                        <th>Framework</th>
+                        <th>Dificultad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>🥇 1°</strong></td>
+                        <td><strong>SVHN</strong></td>
+                        <td>
+                            <strong style="color: #ee5a6f;">92.43%</strong>
+                            <div class="accuracy-bar">
+                                <div class="accuracy-fill" style="width: 92.43%"></div>
+                            </div>
+                        </td>
+                        <td>73,257</td>
+                        <td>10</td>
+                        <td>PyTorch</td>
+                        <td>🔥🔥🔥</td>
+                    </tr>
+                    <tr>
+                        <td><strong>🥈 2°</strong></td>
+                        <td><strong>Fashion-MNIST</strong></td>
+                        <td>
+                            <strong style="color: #667eea;">89.50%</strong>
+                            <div class="accuracy-bar">
+                                <div class="accuracy-fill" style="width: 89.50%"></div>
+                            </div>
+                        </td>
+                        <td>60,000</td>
+                        <td>10</td>
+                        <td>TensorFlow</td>
+                        <td>⭐</td>
+                    </tr>
+                    <tr>
+                        <td><strong>🥉 3°</strong></td>
+                        <td><strong>PlantVillage</strong></td>
+                        <td>
+                            <strong style="color: #11998e;">84.26%</strong>
+                            <div class="accuracy-bar">
+                                <div class="accuracy-fill" style="width: 84.26%"></div>
+                            </div>
+                        </td>
+                        <td>16,516</td>
+                        <td>15</td>
+                        <td>TensorFlow</td>
+                        <td>🔥🔥🔥</td>
+                    </tr>
+                    <tr>
+                        <td><strong>4°</strong></td>
+                        <td><strong>EMNIST</strong></td>
+                        <td>
+                            <strong style="color: #f5576c;">76.90%</strong>
+                            <div class="accuracy-bar">
+                                <div class="accuracy-fill" style="width: 76.90%"></div>
+                            </div>
+                        </td>
+                        <td>4,000</td>
+                        <td>47</td>
+                        <td>TensorFlow</td>
+                        <td>🔥🔥</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5°</strong></td>
+                        <td><strong>CIFAR-10</strong></td>
+                        <td>
+                            <strong style="color: #9b23ea;">69.95%</strong>
+                            <div class="accuracy-bar">
+                                <div class="accuracy-fill" style="width: 69.95%"></div>
+                            </div>
+                        </td>
+                        <td>50,000</td>
+                        <td>10</td>
+                        <td>TensorFlow</td>
+                        <td>🔥🔥</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p><strong>🧠 Deep Learning Projects Collection</strong></p>
+            <p>5 Proyectos CNN | TensorFlow & PyTorch | 2024-2025</p>
+            <p style="opacity: 0.7; margin-top: 15px;">Haz clic en cualquier tarjeta para ver el proyecto completo</p>
+        </div>
+    </div>
+
+    <script>
+        // Función para redirigir a los proyectos
+        function redirectToProject(projectName) {
+            const projectPaths = {
+                'Fashion-MNIST': 'Fashion-MNIST.html',
+                'EMNIST': 'EMNIST.html',
+                'CIFAR-10': 'CIFAR-10.html',
+                'PlantVillage': 'PlantVillage.html',
+                'SVHN': 'SVHN.html'
+            };
+            
+            window.location.href = projectPaths[projectName];
+        }
+
+        // Animación de las barras de accuracy al cargar
+        window.addEventListener('load', function() {
+            const fills = document.querySelectorAll('.accuracy-fill');
+            fills.forEach((fill, index) => {
+                setTimeout(() => {
+                    fill.style.width = fill.style.width;
+                }, index * 200);
+            });
+        });
+
+        // Efecto hover en las tarjetas
+        const cards = document.querySelectorAll('.project-card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.zIndex = '10';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.zIndex = '1';
+            });
+        });
+    </script>
+</body>
+</html>

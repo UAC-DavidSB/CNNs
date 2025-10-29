@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVHN CNN - Infografía</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ee5a6f 0%, #f79d65 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: '🏠';
+            position: absolute;
+            font-size: 150px;
+            opacity: 0.1;
+            top: -30px;
+            left: -20px;
+            animation: bounce 3s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 10px 25px;
+            border-radius: 25px;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 45px;
+        }
+
+        .section-title {
+            font-size: 1.9em;
+            color: #ee5a6f;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #f79d65;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-value {
+            font-size: 2.8em;
+            color: #ee5a6f;
+            font-weight: bold;
+            margin: 12px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-subtitle {
+            font-size: 0.95em;
+            color: #34495e;
+            position: relative;
+            z-index: 1;
+        }
+
+        .architecture {
+            background: linear-gradient(135deg, #fab1a0 0%, #ff7675 100%);
+            padding: 25px;
+            border-radius: 18px;
+            margin-top: 25px;
+        }
+
+        .layer {
+            background: white;
+            padding: 18px;
+            margin: 12px 0;
+            border-radius: 12px;
+            border-left: 5px solid #ee5a6f;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .layer:hover {
+            transform: translateX(8px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            border-left-width: 8px;
+        }
+
+        .layer-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.05em;
+        }
+
+        .layer-params {
+            color: #ee5a6f;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+
+        .dataset-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .dataset-box {
+            background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            color: white;
+        }
+
+        .dataset-box:hover {
+            transform: scale(1.05);
+        }
+
+        .dataset-number {
+            font-size: 2.3em;
+            color: white;
+            font-weight: bold;
+        }
+
+        .dataset-label {
+            color: rgba(255,255,255,0.9);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+            padding: 25px;
+            border-radius: 18px;
+            margin-top: 25px;
+            border-left: 6px solid #fdd835;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .highlight-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+
+        .metrics-comparison {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .metric-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ee5a6f;
+        }
+
+        .performance-badge {
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #ee5a6f;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .digits-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .digit-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .digit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .digit-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #ee5a6f;
+            margin-bottom: 10px;
+        }
+
+        .digit-accuracy {
+            font-size: 1.1em;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ee5a6f, #f79d65);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .recommendation-list {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .recommendation-list li {
+            margin: 12px 0;
+            padding-left: 10px;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .pytorch-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ee4c2c 0%, #f05032 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .digits-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 SVHN CNN (PyTorch)</h1>
+            <p>Street View House Numbers - Reconocimiento de Dígitos en Escenas Reales</p>
+            <span class="badge">Nivel: Difícil 🔥🔥🔥</span>
+            <div class="pytorch-badge">🔥 PyTorch Framework</div>
+        </div>
+
+        <div class="content">
+            <!-- Dataset Info -->
+            <div class="section">
+                <h2 class="section-title">📊 Información del Dataset</h2>
+                <div class="dataset-info">
+                    <div class="dataset-box">
+                        <div class="dataset-number">73,257</div>
+                        <div class="dataset-label">Imágenes de Entrenamiento</div>
+                    </div>
+                    <div class="dataset-box">
+                        <div class="dataset-number">26,032</div>
+                        <div class="dataset-label">Imágenes de Test</div>
+                    </div>
+                    <div class="dataset-box">
+                        <div class="dataset-number">32×32×3</div>
+                        <div class="dataset-label">Dimensión RGB</div>
+                    </div>
+                    <div class="dataset-box">
+                        <div class="dataset-number">10</div>
+                        <div class="dataset-label">Dígitos (0-9)</div>
+                    </div>
+                </div>
+
+                <div class="highlight" style="margin-top: 25px;">
+                    <div class="highlight-title">🎯 Características Especiales del Dataset</div>
+                    <ul class="recommendation-list">
+                        <li><strong>Imágenes del mundo real:</strong> Extraídas de Google Street View con variabilidad natural</li>
+                        <li><strong>Condiciones desafiantes:</strong> Iluminación variable, ángulos diversos, oclusiones</li>
+                        <li><strong>Múltiples estilos:</strong> Diferentes fuentes, colores y tamaños de números de casa</li>
+                        <li><strong>Normalización avanzada:</strong> Centrada en 0.5 con desviación estándar 0.5</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="section">
+                <h2 class="section-title">🎯 Métricas de Rendimiento</h2>
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-title">Accuracy Final</div>
+                        <div class="card-value">92.43%</div>
+                        <div class="card-subtitle">Precisión en test</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Loss Final</div>
+                        <div class="card-value">0.2780</div>
+                        <div class="card-subtitle">Pérdida en test</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Mejor Época</div>
+                        <div class="card-value">10</div>
+                        <div class="card-subtitle">Convergencia óptima</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">F1-Score Macro</div>
+                        <div class="card-value">92%</div>
+                        <div class="card-subtitle">Promedio balanceado</div>
+                    </div>
+                </div>
+
+                <div class="metrics-comparison">
+                    <div class="metric-box">
+                        <div class="metric-label">Época 1</div>
+                        <div class="metric-value">86.76%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Época 5</div>
+                        <div class="metric-value">91.10%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Época 10 (Final)</div>
+                        <div class="metric-value">92.43%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Architecture -->
+            <div class="section">
+                <h2 class="section-title">🏗️ Arquitectura CNN con PyTorch</h2>
+                <div class="architecture">
+                    <div class="layer">
+                        <span class="layer-name">Conv2D (32 filtros, 3×3) + BatchNorm + ReLU</span>
+                        <span class="layer-params">896 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">MaxPooling2D (2×2) → 16×16</span>
+                        <span class="layer-params">0 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Conv2D (64 filtros, 3×3) + BatchNorm + ReLU</span>
+                        <span class="layer-params">18,496 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">MaxPooling2D (2×2) → 8×8</span>
+                        <span class="layer-params">0 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Conv2D (128 filtros, 3×3) + BatchNorm + ReLU</span>
+                        <span class="layer-params">73,856 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">MaxPooling2D (2×2) → 4×4</span>
+                        <span class="layer-params">0 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Flatten (128 × 4 × 4 = 2048)</span>
+                        <span class="layer-params">0 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Dense (256 neuronas) + ReLU</span>
+                        <span class="layer-params">524,544 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Dropout (0.25)</span>
+                        <span class="layer-params">0 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Dense (10 neuronas) - Output</span>
+                        <span class="layer-params">2,570 params</span>
+                    </div>
+                </div>
+                <div class="highlight">
+                    <div class="highlight-title">Total de Parámetros del Modelo</div>
+                    <div style="font-size: 1.6em; color: #2c3e50; margin-top: 10px;">
+                        <strong>620,362 parámetros entrenables</strong>
+                    </div>
+                </div>
+
+                <div class="highlight" style="margin-top: 20px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-left-color: #a8edea;">
+                    <div class="highlight-title">⚡ Técnicas Avanzadas Implementadas</div>
+                    <ul class="recommendation-list">
+                        <li><strong>BatchNormalization:</strong> Estabiliza activaciones y acelera convergencia</li>
+                        <li><strong>Adam Optimizer:</strong> Learning rate adaptativo (lr=0.001)</li>
+                        <li><strong>CrossEntropyLoss:</strong> Función de pérdida para clasificación multiclase</li>
+                        <li><strong>GPU Acceleration:</strong> Entrenamiento en CUDA para mayor velocidad</li>
+                        <li><strong>Dropout estratégico:</strong> 25% para prevenir overfitting</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Training Progress -->
+            <div class="section">
+                <h2 class="section-title">📈 Progreso del Entrenamiento</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">10</div>
+                        <div class="stat-label">Épocas Totales</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">128</div>
+                        <div class="stat-label">Batch Size</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">+5.67%</div>
+                        <div class="stat-label">Mejora Total</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">Adam</div>
+                        <div class="stat-label">Optimizador</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">CUDA</div>
+                        <div class="stat-label">Dispositivo</div>
+                    </div>
+                </div>
+
+                <div class="highlight" style="margin-top: 25px; background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); border-left-color: #96e6a1;">
+                    <div class="highlight-title">📉 Evolución de la Loss</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Train (Época 1)</div>
+                            <div class="stat-value">0.8668</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Test (Época 1)</div>
+                            <div class="stat-value">0.4627</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Train (Época 10)</div>
+                            <div class="stat-value">0.1837</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Test (Época 10)</div>
+                            <div class="stat-value">0.2780</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Digits Performance -->
+            <div class="section">
+                <h2 class="section-title">🔢 Rendimiento por Dígito</h2>
+                <div class="digits-grid">
+                    <div class="digit-card">
+                        <div class="digit-number">0</div>
+                        <div class="digit-accuracy">F1: 92%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 92%"></div>
+                        </div>
+                    </div>
+                    <div class="digit-card">
+                        <div class="digit-number">1</div>
+                        <div class="digit-accuracy">F1: 95%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 95%"></div>
+                        </div>
+                    </div>
+                    <div class="digit-card">
+                        <div class="digit-number">2</div>
+                        <div class="digit-accuracy">F1: 94%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 94%"></div>
+                        </div>
+                    </div>
+                    <div class="digit-card">
+                        <div class="digit-number">3</div>
+                        <div class="digit-accuracy">F1: 89%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 89%"></div>
+                        </div>
+                    </div>
+                    <div class="digit-card">
+                        <div class="digit-number">4</div>
+                        <div class="digit-accuracy">F1: 94%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 94%"></div>
+                        </div>
+                    </div>
+                    <div class="digit-card">
+                        <div class="digit-number">5</div>
+                        <div class="digit-accuracy">F1: 93%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 93%"></div>
+                        </div>
+                    </div>
+                    <div class="digit-card">
+                        <div class="digit-number">6</div>
+                        <div class="digit-accuracy">F1: 91%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 91%"></div>
+                        </div>
+                    </div>
+                    <div class="digit-card">
+                        <div class="digit-number">7</div>
+                        <div class="digit-accuracy">F1: 93%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 93%"></div>
+                        </div>
+                    </div>
+                    <div class="digit-card">
+                        <div class="digit-number">8</div>
+                        <div class="digit-accuracy">F1: 89%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 89%"></div>
+                        </div>
+                    </div>
+                    <div class="digit-card">
+                        <div class="digit-number">9</div>
+                        <div class="digit-accuracy">F1: 88%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 88%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight" style="margin-top: 20px;">
+                    <div class="highlight-title">📊 Estadísticas de Clasificación</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Precisión Promedio</div>
+                            <div class="stat-value">92%</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Recall Promedio</div>
+                            <div class="stat-value">92%</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Mejor Dígito</div>
+                            <div class="stat-value">1 (95%)</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Dígito Desafiante</div>
+                            <div class="stat-value">9 (88%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Analysis -->
+            <div class="section">
+                <h2 class="section-title">💡 Análisis de Rendimiento</h2>
+                
+                <div class="highlight" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); border-left-color: #84fab0;">
+                    <div class="highlight-title" style="color: #2c3e50;">✅ Evaluación General</div>
+                    <div class="performance-badge">EXCELENTE - Rendimiento sobresaliente</div>
+                    <p style="margin-top: 15px; color: #2c3e50; font-size: 1.05em;">
+                        El modelo alcanzó una precisión del <strong>92.43%</strong> en el conjunto de test, 
+                        demostrando excelente capacidad para reconocer dígitos en condiciones reales del mundo con gran variabilidad.
+                    </p>
+                </div>
+
+                <div class="highlight" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-left-color: #fed6e3; margin-top: 20px;">
+                    <div class="highlight-title">🎯 Fortalezas del Modelo</div>
+                    <ul class="recommendation-list">
+                        <li><strong>Alto rendimiento inicial:</strong> 86.76% desde la primera época</li>
+                        <li><strong>Convergencia rápida:</strong> Alcanzó 91% en solo 4 épocas</li>
+                        <li><strong>Estabilidad:</strong> Mejora constante sin oscilaciones significativas</li>
+                        <li><strong>Balance excepcional:</strong> F1-scores entre 88-95% en todas las clases</li>
+                        <li><strong>Mejor clase:</strong> Dígito "1" con 95% de F1-score (precision: 94%, recall: 95%)</li>
+                        <li><strong>BatchNorm efectivo:</strong> Aceleró convergencia y estabilizó entrenamiento</li>
+                    </ul>
+                </div>
+
+                <div class="highlight" style="background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%); border-left-color: #fdcb6e; margin-top: 20px;">
+                    <div class="highlight-title">⚠️ Observaciones y Desafíos</div>
+                    <ul class="recommendation-list">
+                        <li><strong>Dígitos desafiantes:</strong> "3", "8" y "9" tienen F1-scores entre 88-89%</li>
+                        <li><strong>Ligero overfitting:</strong> Loss de test (0.2780) mayor que train (0.1837) en época final</li>
+                        <li><strong>Confusiones principales:</strong> Dígitos con formas similares (3↔8, 6↔8, 5↔3)</li>
+                        <li><strong>Variabilidad del dataset:</strong> Múltiples estilos de fuentes y condiciones de iluminación</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="section">
+                <h2 class="section-title">🚀 Recomendaciones para Optimización</h2>
+                
+                <div class="grid">
+                    <div class="card" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                        <div class="card-title">🎨 Data Augmentation</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Rotación, cambios de brillo y contrast para simular más condiciones de Street View
+                        </div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                        <div class="card-title">🏗️ Arquitectura Residual</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Implementar ResNet o DenseNet para mejorar extracción de características
+                        </div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);">
+                        <div class="card-title">📉 Learning Rate Scheduler</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Reducir LR progresivamente para ajuste fino y mejor convergencia
+                        </div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
+                        <div class="card-title">🔧 Regularización++</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Aumentar dropout a 0.3-0.4 o agregar L2 regularization (weight decay)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight" style="background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); border-left-color: #6c5ce7; margin-top: 25px;">
+                    <div class="highlight-title" style="color: white;">🎓 Conclusiones Clave</div>
+                    <ul class="recommendation-list" style="color: white;">
+                        <li><strong>Rendimiento excepcional:</strong> 92.43% es excelente para un dataset del mundo real tan desafiante</li>
+                        <li><strong>PyTorch vs TensorFlow:</strong> Framework flexible con control granular y debugging eficiente</li>
+                        <li><strong>BatchNorm decisivo:</strong> Técnica clave para estabilizar y acelerar el entrenamiento</li>
+                        <li><strong>Dataset realista:</strong> SVHN más desafiante que MNIST por variabilidad natural</li>
+                        <li><strong>Balance perfecto:</strong> Todas las clases superan 88% de F1-score</li>
+                        <li><strong>Aplicación práctica:</strong> Base sólida para sistemas de lectura automática de direcciones</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Comparison with Other Datasets -->
+            <div class="section">
+                <h2 class="section-title">📊 Comparación con Otros Datasets</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-item" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">Fashion-MNIST</div>
+                        <div class="stat-value" style="color: white;">89.50%</div>
+                    </div>
+                    <div class="stat-item" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">EMNIST</div>
+                        <div class="stat-value" style="color: white;">76.90%</div>
+                    </div>
+                    <div class="stat-item" style="background: linear-gradient(135deg, #5f72bd 0%, #9b23ea 100%); color: white;">
+                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">CIFAR-10</div>
+                        <div class="stat-value" style="color: white;">69.95%</div>
+                    </div>
+                    <div class="stat-item" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">PlantVillage</div>
+                        <div class="stat-value" style="color: white;">84.26%</div>
+                    </div>
+                    <div class="stat-item" style="background: linear-gradient(135deg, #ee5a6f 0%, #f79d65 100%); color: white;">
+                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">SVHN (Este)</div>
+                        <div class="stat-value" style="color: white;">92.43%</div>
+                    </div>
+                </div>
+
+                <div class="highlight" style="margin-top: 25px;">
+                    <div class="highlight-title">🏆 Ranking de Modelos</div>
+                    <div style="margin-top: 15px; color: #2c3e50; line-height: 1.8;">
+                        <strong>1° SVHN:</strong> 92.43% - Dataset real más complejo pero con arquitectura optimizada<br>
+                        <strong>2° Fashion-MNIST:</strong> 89.50% - Dataset sintético bien balanceado<br>
+                        <strong>3° PlantVillage:</strong> 84.26% - Imágenes a color con 15 clases<br>
+                        <strong>4° EMNIST:</strong> 76.90% - 47 clases con pocos datos<br>
+                        <strong>5° CIFAR-10:</strong> 69.95% - Objetos complejos en baja resolución
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Details -->
+            <div class="section">
+                <h2 class="section-title">🔧 Detalles Técnicos PyTorch</h2>
+                
+                <div class="highlight" style="background: linear-gradient(135deg, #fab1a0 0%, #ff7675 100%); border-left-color: #ff7675;">
+                    <div class="highlight-title" style="color: white;">⚡ Ventajas de PyTorch en este Proyecto</div>
+                    <ul class="recommendation-list" style="color: white;">
+                        <li><strong>Define-by-Run:</strong> Grafos computacionales dinámicos facilitan debugging</li>
+                        <li><strong>Pythonic API:</strong> Código más intuitivo y legible que TensorFlow/Keras</li>
+                        <li><strong>GPU Optimization:</strong> torch.cuda para aceleración automática</li>
+                        <li><strong>DataLoader eficiente:</strong> Carga paralela de datos con multiprocessing</li>
+                        <li><strong>Ecosystem robusto:</strong> torchvision con datasets y transforms pre-built</li>
+                        <li><strong>Research-friendly:</strong> Ideal para experimentación y arquitecturas custom</li>
+                    </ul>
+                </div>
+
+                <div class="stats-grid" style="margin-top: 25px;">
+                    <div class="stat-item">
+                        <div class="stat-label">Framework</div>
+                        <div class="stat-value">PyTorch</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Versión Dataset</div>
+                        <div class="stat-value">SVHN v2</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Tiempo/Época</div>
+                        <div class="stat-value">~2 min</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Memoria GPU</div>
+                        <div class="stat-value">~1.5 GB</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Backend</div>
+                        <div class="stat-value">CUDA</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Use Cases -->
+            <div class="section">
+                <h2 class="section-title">🌟 Aplicaciones en el Mundo Real</h2>
+                
+                <div class="grid">
+                    <div class="card" style="background: linear-gradient(135deg, #a8c0ff 0%, #c2e9fb 100%);">
+                        <div class="card-title">🏠 Sistemas de Direcciones</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Lectura automática de números de casa para servicios de entrega y mapeo
+                        </div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                        <div class="card-title">📮 Clasificación de Correo</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Automatización de ordenamiento postal basado en códigos postales
+                        </div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);">
+                        <div class="card-title">🚗 Vehículos Autónomos</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Reconocimiento de señales de límite de velocidad y direcciones
+                        </div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                        <div class="card-title">📱 Apps de Navegación</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Mejora de geolocalización mediante lectura de números en Street View
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final Summary -->
+            <div class="section">
+                <div class="highlight" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-left-color: #667eea;">
+                    <div class="highlight-title" style="color: white;">🎯 Resumen Ejecutivo Final</div>
+                    <div style="margin-top: 15px; color: white; font-size: 1.05em; line-height: 1.8;">
+                        <p><strong>Dataset:</strong> SVHN con 73,257 imágenes de entrenamiento y 26,032 de test</p>
+                        <p><strong>Modelo:</strong> CNN de 3 capas con BatchNorm y 620K parámetros</p>
+                        <p><strong>Rendimiento:</strong> 92.43% accuracy con F1-scores balanceados (88-95%)</p>
+                        <p><strong>Framework:</strong> PyTorch con aceleración GPU (CUDA)</p>
+                        <p><strong>Tiempo total:</strong> ~20 minutos para 10 épocas</p>
+                        <p><strong>Ranking:</strong> Mejor modelo de los 5 casos evaluados</p>
+                        <p><strong>Estado:</strong> ✅ Listo para despliegue en aplicaciones reales</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

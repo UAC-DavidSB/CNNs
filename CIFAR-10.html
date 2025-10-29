@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIFAR-10 CNN - Infografía</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #5f72bd 0%, #9b23ea 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: '🖼️';
+            position: absolute;
+            font-size: 150px;
+            opacity: 0.1;
+            top: -30px;
+            right: -20px;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.25);
+            padding: 10px 25px;
+            border-radius: 25px;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 1.1em;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 45px;
+        }
+
+        .section-title {
+            font-size: 1.9em;
+            color: #667eea;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 4px solid #9b23ea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #a8c0ff 0%, #c2e9fb 100%);
+            padding: 30px;
+            border-radius: 18px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-title {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-value {
+            font-size: 2.8em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 12px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-subtitle {
+            font-size: 0.95em;
+            color: #34495e;
+            position: relative;
+            z-index: 1;
+        }
+
+        .architecture {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            padding: 25px;
+            border-radius: 18px;
+            margin-top: 25px;
+        }
+
+        .layer {
+            background: white;
+            padding: 18px;
+            margin: 12px 0;
+            border-radius: 12px;
+            border-left: 5px solid #9b23ea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .layer:hover {
+            transform: translateX(8px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            border-left-width: 8px;
+        }
+
+        .layer-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.05em;
+        }
+
+        .layer-params {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.05em;
+        }
+
+        .dataset-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .dataset-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .dataset-box:hover {
+            transform: scale(1.05);
+        }
+
+        .dataset-number {
+            font-size: 2.3em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .dataset-label {
+            color: #2c3e50;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%);
+            padding: 25px;
+            border-radius: 18px;
+            margin-top: 25px;
+            border-left: 6px solid #fdd835;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .highlight-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+
+        .metrics-comparison {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .metric-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .performance-badge {
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .class-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #9b23ea;
+            transition: all 0.3s ease;
+        }
+
+        .class-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .class-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+
+        .class-accuracy {
+            font-size: 1.4em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .recommendation-list {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 15px;
+        }
+
+        .recommendation-list li {
+            margin: 12px 0;
+            padding-left: 10px;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #9b23ea);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .confusion-note {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-comparison {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 CIFAR-10 CNN</h1>
+            <p>Clasificación de Imágenes en Color mediante Deep Learning</p>
+            <span class="badge">Nivel: Medio 🔥🔥</span>
+        </div>
+
+        <div class="content">
+            <!-- Dataset Info -->
+            <div class="section">
+                <h2 class="section-title">📊 Información del Dataset</h2>
+                <div class="dataset-info">
+                    <div class="dataset-box">
+                        <div class="dataset-number">50,000</div>
+                        <div class="dataset-label">Imágenes de Entrenamiento</div>
+                    </div>
+                    <div class="dataset-box">
+                        <div class="dataset-number">10,000</div>
+                        <div class="dataset-label">Imágenes de Test</div>
+                    </div>
+                    <div class="dataset-box">
+                        <div class="dataset-number">32×32×3</div>
+                        <div class="dataset-label">Dimensión RGB</div>
+                    </div>
+                    <div class="dataset-box">
+                        <div class="dataset-number">10</div>
+                        <div class="dataset-label">Clases de Objetos</div>
+                    </div>
+                </div>
+
+                <div class="highlight" style="margin-top: 25px;">
+                    <div class="highlight-title">🎨 Características del Dataset</div>
+                    <ul class="recommendation-list">
+                        <li><strong>Dataset balanceado:</strong> 5,000 imágenes por clase en entrenamiento</li>
+                        <li><strong>Imágenes a color:</strong> 3 canales RGB con más información visual</li>
+                        <li><strong>Baja resolución:</strong> 32×32 píxeles añade dificultad al reconocimiento</li>
+                        <li><strong>Variedad de objetos:</strong> Vehículos, animales y transportes diversos</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="section">
+                <h2 class="section-title">🎯 Métricas de Rendimiento</h2>
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-title">Accuracy Final</div>
+                        <div class="card-value">69.95%</div>
+                        <div class="card-subtitle">Precisión en test</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Loss Final</div>
+                        <div class="card-value">0.8683</div>
+                        <div class="card-subtitle">Pérdida en test</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Mejor Época</div>
+                        <div class="card-value">10</div>
+                        <div class="card-subtitle">Convergencia final</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Mejora Total</div>
+                        <div class="card-value">+21.75%</div>
+                        <div class="card-subtitle">Desde época 1</div>
+                    </div>
+                </div>
+
+                <div class="metrics-comparison">
+                    <div class="metric-box">
+                        <div class="metric-label">Entrenamiento Final</div>
+                        <div class="metric-value">69.29%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Validación Final</div>
+                        <div class="metric-value">69.95%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Época 1</div>
+                        <div class="metric-value">48.20%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Architecture -->
+            <div class="section">
+                <h2 class="section-title">🏗️ Arquitectura del Modelo</h2>
+                <div class="architecture">
+                    <div class="layer">
+                        <span class="layer-name">Conv2D (32 filtros, 3×3) + ReLU</span>
+                        <span class="layer-params">896 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">MaxPooling2D (2×2)</span>
+                        <span class="layer-params">0 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Conv2D (64 filtros, 3×3) + ReLU</span>
+                        <span class="layer-params">18,496 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">MaxPooling2D (2×2)</span>
+                        <span class="layer-params">0 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Conv2D (64 filtros, 3×3) + ReLU</span>
+                        <span class="layer-params">36,928 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Flatten</span>
+                        <span class="layer-params">0 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Dense (64 neuronas) + ReLU</span>
+                        <span class="layer-params">102,464 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Dropout (0.5)</span>
+                        <span class="layer-params">0 params</span>
+                    </div>
+                    <div class="layer">
+                        <span class="layer-name">Dense (10 neuronas) + Softmax</span>
+                        <span class="layer-params">650 params</span>
+                    </div>
+                </div>
+                <div class="highlight">
+                    <div class="highlight-title">Total de Parámetros del Modelo</div>
+                    <div style="font-size: 1.6em; color: #2c3e50; margin-top: 10px;">
+                        <strong>159,434 parámetros entrenables</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Training Progress -->
+            <div class="section">
+                <h2 class="section-title">📈 Progreso del Entrenamiento</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">10</div>
+                        <div class="stat-label">Épocas Totales</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">64</div>
+                        <div class="stat-label">Batch Size</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">782</div>
+                        <div class="stat-label">Steps/Época</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">Adam</div>
+                        <div class="stat-label">Optimizador</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">0.5</div>
+                        <div class="stat-label">Dropout Rate</div>
+                    </div>
+                </div>
+
+                <div class="highlight" style="margin-top: 25px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-left-color: #fed6e3;">
+                    <div class="highlight-title">📊 Evolución por Época</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-label">Época 1</div>
+                            <div class="stat-value">48.20%</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Época 5</div>
+                            <div class="stat-value">64.14%</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Época 10</div>
+                            <div class="stat-value">69.95%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Performance -->
+            <div class="section">
+                <h2 class="section-title">🎨 Rendimiento por Clase</h2>
+                <div class="classes-grid">
+                    <div class="class-card">
+                        <div class="class-name">✈️ Avión</div>
+                        <div class="class-accuracy">72.70%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 72.7%"></div>
+                        </div>
+                    </div>
+                    <div class="class-card">
+                        <div class="class-name">🚗 Automóvil</div>
+                        <div class="class-accuracy">80.20%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 80.2%"></div>
+                        </div>
+                    </div>
+                    <div class="class-card">
+                        <div class="class-name">🐦 Pájaro</div>
+                        <div class="class-accuracy">64.60%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 64.6%"></div>
+                        </div>
+                    </div>
+                    <div class="class-card">
+                        <div class="class-name">🐱 Gato</div>
+                        <div class="class-accuracy">46.30%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 46.3%"></div>
+                        </div>
+                    </div>
+                    <div class="class-card">
+                        <div class="class-name">🦌 Ciervo</div>
+                        <div class="class-accuracy">50.40%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 50.4%"></div>
+                        </div>
+                    </div>
+                    <div class="class-card">
+                        <div class="class-name">🐕 Perro</div>
+                        <div class="class-accuracy">75.30%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75.3%"></div>
+                        </div>
+                    </div>
+                    <div class="class-card">
+                        <div class="class-name">🐸 Rana</div>
+                        <div class="class-accuracy">72.60%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 72.6%"></div>
+                        </div>
+                    </div>
+                    <div class="class-card">
+                        <div class="class-name">🐴 Caballo</div>
+                        <div class="class-accuracy">71.80%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 71.8%"></div>
+                        </div>
+                    </div>
+                    <div class="class-card">
+                        <div class="class-name">⛵ Barco</div>
+                        <div class="class-accuracy">83.70%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 83.7%"></div>
+                        </div>
+                    </div>
+                    <div class="class-card">
+                        <div class="class-name">🚚 Camión</div>
+                        <div class="class-accuracy">83.00%</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 83%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="confusion-note">
+                    <strong>⚠️ Confusiones Principales:</strong> Las mayores confusiones ocurren entre clases visualmente similares como Gato↔Perro, Pájaro↔Avión, y Ciervo↔Caballo debido a la baja resolución de 32×32 píxeles.
+                </div>
+            </div>
+
+            <!-- Performance Analysis -->
+            <div class="section">
+                <h2 class="section-title">💡 Análisis de Rendimiento</h2>
+                
+                <div class="highlight" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); border-left-color: #84fab0;">
+                    <div class="highlight-title" style="color: #2c3e50;">✅ Evaluación General</div>
+                    <div class="performance-badge">BUENO - Rendimiento satisfactorio</div>
+                    <p style="margin-top: 15px; color: #2c3e50; font-size: 1.05em;">
+                        El modelo alcanzó una precisión del <strong>69.95%</strong> en el conjunto de test, 
+                        demostrando capacidad razonable para clasificar objetos en imágenes de baja resolución.
+                    </p>
+                </div>
+
+                <div class="highlight" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-left-color: #fed6e3; margin-top: 20px;">
+                    <div class="highlight-title">🎯 Fortalezas del Modelo</div>
+                    <ul class="recommendation-list">
+                        <li><strong>Mejor rendimiento:</strong> Barco (83.70%), Camión (83.00%) y Automóvil (80.20%)</li>
+                        <li><strong>Convergencia estable:</strong> Mejora consistente de 48.20% a 69.95% en 10 épocas</li>
+                        <li><strong>Sin overfitting:</strong> Validación (69.95%) ligeramente superior a entrenamiento (69.29%)</li>
+                        <li><strong>Generalización efectiva:</strong> Buena capacidad de predicción en datos no vistos</li>
+                    </ul>
+                </div>
+
+                <div class="highlight" style="background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%); border-left-color: #fdcb6e; margin-top: 20px;">
+                    <div class="highlight-title">⚠️ Desafíos Identificados</div>
+                    <ul class="recommendation-list">
+                        <li><strong>Clases difíciles:</strong> Gato (46.30%) y Ciervo (50.40%) tienen bajo rendimiento</li>
+                        <li><strong>Confusión entre animales:</strong> Gato↔Perro son frecuentemente confundidos</li>
+                        <li><strong>Baja resolución:</strong> 32×32 píxeles limita la captura de detalles finos</li>
+                        <li><strong>Similitud visual:</strong> Animales cuadrúpedos presentan características similares</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="section">
+                <h2 class="section-title">🚀 Recomendaciones para Optimización</h2>
+                
+                <div class="grid">
+                    <div class="card" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                        <div class="card-title">🏗️ Arquitectura Profunda</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Agregar más capas convolucionales (ResNet, VGG) para capturar características complejas
+                        </div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                        <div class="card-title">🔄 Data Augmentation</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Rotación, flip, zoom y variaciones de color para aumentar variabilidad
+                        </div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);">
+                        <div class="card-title">📚 Transfer Learning</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Usar modelos pre-entrenados (EfficientNet, MobileNet) con fine-tuning
+                        </div>
+                    </div>
+                    <div class="card" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
+                        <div class="card-title">⏱️ Más Entrenamiento</div>
+                        <div class="card-subtitle" style="margin-top: 10px;">
+                            Extender a 25-30 épocas con learning rate scheduler y early stopping
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight" style="background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%); border-left-color: #6c5ce7; margin-top: 20px;">
